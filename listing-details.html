@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch Property by ID</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div class="container my-5">
+    <h1 class="text-center">Fetch Property by ID</h1>
+    <div class="card p-4">
+      <form id="propertyForm">
+        <div class="mb-3">
+          <label for="propertyType" class="form-label">Select Property Type:</label>
+          <select class="form-select" id="propertyType" required>
+            <option value="residential">Residential</option>
+            <option value="commercial">Commercial</option>
+            <option value="land">Land</option>
+            <option value="retail">Retail</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="propertyId" class="form-label">Enter Property ID:</label>
+          <input type="text" class="form-control" id="propertyId" placeholder="e.g., 64e2fabc1234567890abcdef" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Fetch Property</button>
+      </form>
+    </div>
+
+    <div class="mt-5" id="propertyDetails" style="display: none;">
+      <h2>Property Details</h2>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Location:</strong> <span id="location"></span></li>
+        <li class="list-group-item"><strong>Price:</strong> <span id="price"></span></li>
+        <li class="list-group-item"><strong>Availability:</strong> <span id="availability"></span></li>
+        <li class="list-group-item"><strong>Category:</strong> <span id="category"></span></li>
+        <li class="list-group-item"><strong>Description:</strong> <span id="description"></span></li>
+        <li class="list-group-item"><strong>Status:</strong> <span id="status"></span></li>
+        <li class="list-group-item"><strong>Agent:</strong> <span id="agent"></span></li>
+        <li class="list-group-item"><strong>Images:</strong>
+          <div id="images" class="mt-2"></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const endpoints = {
+      residential: 'https://srpropertiesbackend.vercel.app/api/residentialproperties',
+      commercial: 'https://srpropertiesbackend.vercel.app/api/commercialproperties',
+      land: 'https://srpropertiesbackend.vercel.app/api/lands',
+      retail: 'https://srpropertiesbackend.vercel.app/api/retailproperties',
+    };
+
+    document.getElementById('propertyForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const propertyType = document.getElementById('propertyType').value;
+      const propertyId = document.getElementById('propertyId').value;
+      const propertyDetails = document.getElementById('propertyDetails');
+
+      const apiUrl = `${endpoints[propertyType]}/${propertyId}`;
+
+      try {
+        const response = await axios.get(apiUrl);
+        const property = response.data;
+
+        document.getElementById('location').textContent = property.location || 'N/A';
+        document.getElementById('price').textContent = property.price || 'N/A';
+        document.getElementById('availability').textContent = property.availability || 'N/A';
+        document.getElementById('category').textContent = property.category || 'N/A';
+        document.getElementById('description').textContent = property.description || 'N/A';
+        document.getElementById('status').textContent = property.status || 'N/A';
+        document.getElementById('agent').textContent = property.agent || 'N/A';
+
+        const imagesContainer = document.getElementById('images');
+        imagesContainer.innerHTML = '';
+        if (property.images && property.images.length > 0) {
+          property.images.forEach((image) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = image;
+            imgElement.alt = "Property Image";
+            imgElement.className = "img-thumbnail me-2";
+            imgElement.style.width = "100px";
+            imagesContainer.appendChild(imgElement);
+          });
+        } else {
+          imagesContainer.textContent = 'No images available';
+        }
+
+        propertyDetails.style.display = 'block';
+      } catch (error) {
+        alert('Error fetching property. Please check the ID and type.');
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
